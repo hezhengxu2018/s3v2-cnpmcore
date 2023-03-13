@@ -6,7 +6,7 @@ export default [
   {
     input: './src/index.ts',
     output: {
-      dir: 'dist',
+      dir: 'lib',
       format: 'cjs',
       entryFileNames: '[name].cjs.js',
     },
@@ -15,7 +15,7 @@ export default [
   }, {
     input: './src/index.ts',
     output: {
-      dir: 'dist',
+      dir: 'lib',
       format: 'esm',
       entryFileNames: '[name].esm.js',
     },
