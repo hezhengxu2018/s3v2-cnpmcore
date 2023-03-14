@@ -8,6 +8,7 @@
   "engines": {
     "node": ">= 16.13.0"
   },
+  "type": "module",
   "files": [
     "lib"
   ],
@@ -15,7 +16,7 @@
     "dev": "rollup -w -c",
     "lint": "rome check --apply-suggested ./src ./test && rome format --write ./src ./test",
     "build": "rollup -c",
-    "test": "mocha test/*.test.ts --require ts-node/register"
+    "test": "mocha"
   },
   "author": "hezhengxu",
   "license": "ISC",
