@@ -9,14 +9,15 @@
     "node": ">= 16.13.0"
   },
   "files": [
-    "dist"
+    "lib"
   ],
   "scripts": {
     "dev": "rollup -w -c",
     "lint": "rome check --apply-suggested ./src ./test && rome format --write ./src ./test",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "test": "mocha test/*.test.ts --require ts-node/register"
   },
-  "author": "",
+  "author": "hezhengxu",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1310.0"
