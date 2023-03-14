@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "dev": "rollup -w -c",
-    "lint": "rome check --apply-suggested ./src && rome format --write ./src",
+    "lint": "rome check --apply-suggested ./src ./test && rome format --write ./src ./test",
     "build": "rollup -c"
   },
   "author": "",

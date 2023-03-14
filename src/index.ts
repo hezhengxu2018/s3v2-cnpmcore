@@ -14,20 +14,18 @@ class S3v2Client {
 
   trimKey(key: string) {
     key = key ? key.replace(/^\//, "") : "";
-    // %3A => :
-    key = key && key.indexOf("%3A") >= 0 ? decodeURIComponent(key) : key;
     return key;
   }
 
   async upload(file: string | Buffer, options: UploadOptions) {
-    const key = this.trimKey(options.key);
+    const _key = this.trimKey(options.key);
     if (typeof file === "string") {
       file = await fs.readFile(file);
     }
     await this.s3
-      .putObject({ Bucket: this.config.bucket, Key: key, Body: file, ContentLength: options.size })
+      .putObject({ Bucket: this.config.bucket, Key: _key, Body: file, ContentLength: options.size })
       .promise();
-    return { key: key };
+    return { key: options.key };
   }
 
   async uploadBytes(bytes: string | Buffer, options: UploadOptions) {
@@ -38,11 +36,11 @@ class S3v2Client {
   }
 
   async appendBytes(bytes: Uint8Array | string, options: AppendOptions) {
-    const key = this.trimKey(options.key);
+    const _key = this.trimKey(options.key);
     if (typeof bytes === "string") {
       bytes = Buffer.from(bytes);
     }
-    const oldBytes = await this.readBytes(key);
+    const oldBytes = await this.readBytes(_key);
     if (oldBytes) {
       const oldBuffer = new Uint8Array(oldBytes);
       const newBytes = Buffer.concat([oldBuffer, Buffer.from(bytes)]);
@@ -54,24 +52,24 @@ class S3v2Client {
   }
 
   async readBytes(key: string) {
-    key = this.trimKey(key);
+    const _key = this.trimKey(key);
     try {
-      return (await this.s3.getObject({ Bucket: this.config.bucket, Key: key }).promise()).Body as Buffer;
+      return (await this.s3.getObject({ Bucket: this.config.bucket, Key: _key }).promise()).Body as Buffer;
     } catch (error) {
       return undefined;
     }
   }
 
   async download(key: string, savePath: string) {
-    key = this.trimKey(key);
-    const res = (await this.s3.getObject({ Bucket: this.config.bucket, Key: key }).promise()).Body as Buffer;
+    const _key = this.trimKey(key);
+    const res = (await this.s3.getObject({ Bucket: this.config.bucket, Key: _key }).promise()).Body as Buffer;
     await fs.writeFile(savePath, res);
   }
 
   async createDownloadStream(key: string) {
-    key = this.trimKey(key);
+    const _key = this.trimKey(key);
     try {
-      await this.s3.headObject({ Bucket: this.config.bucket, Key: key }).promise();
+      await this.s3.headObject({ Bucket: this.config.bucket, Key: _key }).promise();
     } catch (error) {
       if ((error as AWSError).statusCode === 404) {
         return undefined;
@@ -79,21 +77,25 @@ class S3v2Client {
         throw error;
       }
     }
-    return this.s3.getObject({ Bucket: this.config.bucket, Key: key }).createReadStream();
+    return this.s3.getObject({ Bucket: this.config.bucket, Key: _key }).createReadStream();
   }
 
   async remove(key: string) {
-    key = this.trimKey(key);
-    await this.s3.deleteObject({ Bucket: this.config.bucket, Key: key }).promise();
+    const _key = this.trimKey(key);
+    await this.s3.deleteObject({ Bucket: this.config.bucket, Key: _key }).promise();
   }
 
   async list(prefix: string) {
-    return (await this.s3.listObjectsV2({ Bucket: this.config.bucket, Prefix: prefix }).promise()).Contents;
+    const _prefix = this.trimKey(prefix);
+    const fileList = (await this.s3.listObjectsV2({ Bucket: this.config.bucket, Prefix: _prefix }).promise()).Contents;
+    return fileList?.map((item) => {
+      return item.Key?.split(`${_prefix}/`)[1];
+    });
   }
 
   async url(key: string) {
-    key = this.trimKey(key);
-    return `${this.config.endpoint}/${this.config.bucket}/${key}`;
+    const _key = this.trimKey(key);
+    return `${this.config.endpoint}/${this.config.bucket}/${_key}`;
   }
 }
 
