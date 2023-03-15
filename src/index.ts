@@ -44,9 +44,11 @@ class S3v2Client {
     if (oldBytes) {
       const oldBuffer = new Uint8Array(oldBytes);
       const newBytes = Buffer.concat([oldBuffer, Buffer.from(bytes)]);
+      await this.remove(options.key);
       return await this.uploadBytes(newBytes, options);
     } else {
       const newBytes = Buffer.from(bytes);
+      await this.remove(options.key);
       return await this.uploadBytes(newBytes, options);
     }
   }

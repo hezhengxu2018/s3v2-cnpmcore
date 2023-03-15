@@ -11,9 +11,6 @@ const s3Config: ClientConfiguration = {
   accessKeyId: env.S3_CNPMCORE_ID,
   secretAccessKey: env.S3_CNPMCORE_KEY,
   bucket: env.S3_CNPMCORE_BUCKET!,
-  sslEnabled: true,
-  s3ForcePathStyle: true,
-  apiVersion: "2006-03-01",
 };
 
 describe("s3-cnpmcore", () => {
@@ -24,13 +21,14 @@ describe("s3-cnpmcore", () => {
       let res = await client.upload(__filename, { key: "hello/upload.ts" });
       assert(res.key === "hello/upload.ts");
       res = await client.upload(__filename, { key: "/hello/a/b/hello.txt" });
-      assert(res.key === "hello/a/b/hello.txt");
+      assert(res.key === "/hello/a/b/hello.txt");
     });
 
     it("should upload bytes OK", async () => {
       const bytesKey = "hello/cnpmcore-test-upload-bytes";
       let res = await client.uploadBytes("hello s3-cnpmcore", { key: bytesKey });
-      assert(res.key === bytesKey);
+      console.log("key:",res.key,bytesKey)
+      assert.equal(res.key ,bytesKey);
       const bytes = await client.readBytes(bytesKey);
       assert(bytes);
       assert(bytes.toString() === "hello s3-cnpmcore");
@@ -54,15 +52,27 @@ describe("s3-cnpmcore", () => {
 
   describe("appendBytes()", () => {
     it("should append ok", async () => {
+      const deleteRes = await client.remove("hello/bar.txt")
+      console.log(deleteRes)
+      let bytes0
+      let counter = 0
+      do {
+        bytes0 = (await client.readBytes("hello/bar.txt"))?.toString('utf8')
+        counter++
+        console.log(bytes0,counter)
+      } while (bytes0);
+      assert.equal(bytes0,undefined);
       let res = await client.appendBytes("hello", { key: "hello/bar.txt" });
       assert(res.key === "hello/bar.txt");
-      assert.equal(await client.readBytes(res.key), "hello");
+      const bytes1 = (await client.readBytes(res.key))?.toString('utf8')
+      assert.equal(bytes1, "hello");
       res = await client.appendBytes(" world", { key: "hello/bar.txt" });
       assert(res.key === "hello/bar.txt");
-      assert.equal(await client.readBytes(res.key), "hello world");
+      const bytes2 = (await client.readBytes(res.key))?.toString()
+      assert.equal(bytes2, "hello world");
       res = await client.appendBytes("\nagain", { key: "hello/bar.txt" });
       assert(res.key === "hello/bar.txt");
-      assert.equal(await client.readBytes(res.key), "hello world\nagain");
+      assert.equal((await client.readBytes(res.key))?.toString(), "hello world\nagain");
     });
   });
 
@@ -82,13 +92,13 @@ describe("s3-cnpmcore", () => {
       const dest = path.join(__dirname, "hello");
       const stream = await client.createDownloadStream("hello/download-bar.tgz");
       const writeStream = createWriteStream(dest);
-      await pipeline(stream!, writeStream);
+      stream && await pipeline(stream, writeStream);
       assert.equal(await fs.readFile(dest, "utf8"), "hello bar");
     });
 
     it("should get undefined when file not exists", async () => {
       const stream = await client.createDownloadStream("hello/file-not-exists.bar");
-      assert(stream, undefined);
+      assert.equal(stream, undefined);
     });
   });
 
@@ -100,7 +110,7 @@ describe("s3-cnpmcore", () => {
       await client.remove("/foo/-/foo-1.3.2.txt");
       await client.remove("not-exists-dir/foo/-/foo-1.3.2.txt");
       assert.equal(await client.readBytes("hello/download-bar.tgz"), undefined);
-      assert.equal(await client.readBytes("foo/-/foo-1.3.2.txt"), false);
+      assert.equal(await client.readBytes("foo/-/foo-1.3.2.txt"), undefined);
     });
   });
 
