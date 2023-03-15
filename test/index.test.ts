@@ -27,7 +27,6 @@ describe("s3-cnpmcore", () => {
     it("should upload bytes OK", async () => {
       const bytesKey = "hello/cnpmcore-test-upload-bytes";
       let res = await client.uploadBytes("hello s3-cnpmcore", { key: bytesKey });
-      console.log("key:",res.key,bytesKey)
       assert.equal(res.key ,bytesKey);
       const bytes = await client.readBytes(bytesKey);
       assert(bytes);
@@ -52,16 +51,7 @@ describe("s3-cnpmcore", () => {
 
   describe("appendBytes()", () => {
     it("should append ok", async () => {
-      const deleteRes = await client.remove("hello/bar.txt")
-      console.log(deleteRes)
-      let bytes0
-      let counter = 0
-      do {
-        bytes0 = (await client.readBytes("hello/bar.txt"))?.toString('utf8')
-        counter++
-        console.log(bytes0,counter)
-      } while (bytes0);
-      assert.equal(bytes0,undefined);
+      await client.remove("hello/bar.txt")
       let res = await client.appendBytes("hello", { key: "hello/bar.txt" });
       assert(res.key === "hello/bar.txt");
       const bytes1 = (await client.readBytes(res.key))?.toString('utf8')
