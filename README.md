@@ -4,6 +4,9 @@ a S3 storage wrapper which based on aws-sdk 2.x for [cnpmcore](https://github.co
 
 ## Installation
 
+```shell
+npm i s3v2-cnpmcore
+```
 
 ## Usage
 
