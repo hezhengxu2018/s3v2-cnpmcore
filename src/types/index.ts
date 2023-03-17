@@ -13,5 +13,6 @@ export interface UploadResult {
 }
 
 export interface ClientConfiguration extends S3.Types.ClientConfiguration {
+  endpoint: string;
   bucket: string;
 }

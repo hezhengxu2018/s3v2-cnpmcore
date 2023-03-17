@@ -1,6 +1,6 @@
 {
   "name": "s3v2-cnpmcore",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a s3 adapter for cnpmcore",
   "main": "./lib/index.cjs.js",
   "module": "./lib/index.esm.js",
