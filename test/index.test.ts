@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import { createWriteStream } from "fs";
 import { pipeline } from "stream/promises";
 import { ClientConfiguration } from "../src/types/index";
+import S3 from "aws-sdk/clients/s3";
 import S3v2Client from "../src/index";
 const env = process.env;
 const s3Config: ClientConfiguration = {
@@ -107,10 +108,24 @@ describe("s3-cnpmcore", () => {
   });
 
   describe("url", () => {
-    it("should return the correct url", async () => {
-      await client.uploadBytes("hello", { key: "hello/url-foo.tgz" });
+    it("should return a string, not a Promise", () => {
       const url = client.url("hello/url-foo.tgz");
-      console.log(url);
+      assert.equal(typeof url, "string");
+    });
+
+    it("should return the correct url", async () => {
+      const url = new URL(client.url("hello/url-foo.tgz"));
+      const s3Client = new S3({
+        region: env.S3_CLIENT_REGION,
+        endpoint: env.S3_CLIENT_ENDPOINT!,
+        accessKeyId: env.S3_CLIENT_ID!,
+        secretAccessKey: env.S3_CLIENT_SECRET!,
+      });
+      const signedUrl = new URL(
+        await s3Client.getSignedUrlPromise("getObject", { Bucket: "npm-test", Key: "hello/url-foo.tgz" }),
+      );
+      assert(url.host === signedUrl.host);
+      assert(url.pathname === signedUrl.pathname);
     });
   });
 
