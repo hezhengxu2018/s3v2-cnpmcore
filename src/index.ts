@@ -50,16 +50,14 @@ class S3v2Client {
       await this.remove(options.key);
       await this.uploadBytes(newBytes, options);
       return {
-        key: options.key,
-        nextAppendPosition: Buffer.byteLength(newBytes),
+        key: options.key
       };
     } else {
       const newBytes = Buffer.from(bytes);
       await this.remove(options.key);
       await this.uploadBytes(newBytes, options);
       return {
-        key: options.key,
-        nextAppendPosition: Buffer.byteLength(newBytes),
+        key: options.key
       };
     }
   }
