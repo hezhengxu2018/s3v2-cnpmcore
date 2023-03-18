@@ -32,7 +32,8 @@ config.nfs.client = new S3v2Client({
   bucket: 'npm',
   // optional
   region: 'eu-west-1', // default is ''
-  
+  // optional
+  disableURL: true // default is false, set true when S3 provider can not provide anonymous url
 })
 ```
 
