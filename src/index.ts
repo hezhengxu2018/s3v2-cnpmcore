@@ -114,14 +114,3 @@ class S3v2Client {
 }
 
 export default S3v2Client;
-
-type ParamType<T> = T extends (arg: infer P) => any ? P : undefined;
-interface User {
-  name: string;
-  age: number;
-}
-
-type Func = (user: User) => void;
-
-type Param = ParamType<Func>; // Param = User
-type AA = ParamType<string>; // string
