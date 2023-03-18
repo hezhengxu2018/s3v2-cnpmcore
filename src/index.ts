@@ -10,6 +10,9 @@ class S3v2Client {
   constructor(config: ClientConfiguration) {
     this.config = config;
     this.s3 = new S3(config);
+    if (config.disableURL) {
+      this.url = undefined;
+    }
   }
 
   trimKey(key: string) {
@@ -103,11 +106,22 @@ class S3v2Client {
     });
   }
 
-  url(key: string) {
+  public url: Function | undefined = (key: string) => {
     const _key = this.trimKey(key);
     const endpointHost = new URL(this.config.endpoint).host;
     return `http://${this.config.bucket}.${endpointHost}/${_key}`;
-  }
+  };
 }
 
 export default S3v2Client;
+
+type ParamType<T> = T extends (arg: infer P) => any ? P : undefined;
+interface User {
+  name: string;
+  age: number;
+}
+
+type Func = (user: User) => void;
+
+type Param = ParamType<Func>; // Param = User
+type AA = ParamType<string>; // string

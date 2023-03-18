@@ -109,12 +109,12 @@ describe("s3-cnpmcore", () => {
 
   describe("url", () => {
     it("should return a string, not a Promise", () => {
-      const url = client.url("hello/url-foo.tgz");
+      const url = client.url?.("hello/url-foo.tgz");
       assert.equal(typeof url, "string");
     });
 
     it("should return the correct url", async () => {
-      const url = new URL(client.url("hello/url-foo.tgz"));
+      const url = new URL(client.url?.("hello/url-foo.tgz"));
       const s3Client = new S3({
         region: env.S3_CLIENT_REGION,
         endpoint: env.S3_CLIENT_ENDPOINT!,
@@ -126,6 +126,13 @@ describe("s3-cnpmcore", () => {
       );
       assert(url.host === signedUrl.host);
       assert(url.pathname === signedUrl.pathname);
+    });
+
+    it("should return undefined when disabled url", () => {
+      s3Config.disableURL = true;
+      const _client = new S3v2Client(s3Config);
+      const url = _client.url?.("hello/url-foo.tgz");
+      assert.equal(url, undefined);
     });
   });
 
